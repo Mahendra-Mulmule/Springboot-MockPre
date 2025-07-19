@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mahi.mockprep.Dto.UserDto;
 import com.mahi.mockprep.Service.UserService;
 import com.mahi.mockprep.model.User;
 
@@ -22,14 +23,28 @@ public class UserController {
 	
 	
 	@PostMapping("/register")
-	public User register(@RequestBody User user ) {
-		return userservice.register(user);
-	}
+	public UserDto register(@RequestBody UserDto userdto) {
+		
+		User user=new User();
+		user.setName(userdto.getName());
+		user.setEmail(userdto.getEmail());
+		user.setPassword(userdto.getPassword());
+		
+	User saveuser =userservice.register(user);
 	
-	@PostMapping("/login")
-	public Optional<User>login(@RequestBody User loginData){
-		return userservice.login(loginData.getEmail(),loginData.getPassword());
-				
+	//convert save entity into dto 
+	 return new UserDto(saveuser.getId(), saveuser.getName(), saveuser.getEmail(), saveuser.getPassword());
+    }
+	
+	 @PostMapping("/login")
+	    public UserDto login(@RequestBody UserDto loginData) {
+	        Optional<User> userOpt = userservice.login(loginData.getEmail(), loginData.getPassword());
+
+	        if (userOpt.isPresent()) {
+	            User u = userOpt.get();
+	            return new UserDto(u.getId(), u.getName(), u.getEmail(), u.getPassword());
+	        }
+	        return null;	
 	}
 
 }
